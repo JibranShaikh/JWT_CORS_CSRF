@@ -67,11 +67,12 @@ public class WebSecurityConfig {
 						return cors;
 					}
 				}))
-				//we will store the csrf token as a cookie. withHttpOnlyFalse will allow your UI app to read the cookie or else by default only the browser
-				//can read the cookie.
 				//.csrf(AbstractHttpConfigurer::disable)
 				.csrf(csrfConfig-> csrfConfig
 						.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
+						.ignoringRequestMatchers("/login")
+				//this will generate and store the csrf token as a cookie. withHttpOnlyFalse will allow your UI app to read the cookie or else by default only the browser
+				//can read the cookie.
 						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
 				.authorizeHttpRequests(request -> request.requestMatchers("/login").permitAll()
 						.anyRequest().authenticated())

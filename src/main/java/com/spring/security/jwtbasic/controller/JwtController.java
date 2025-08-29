@@ -30,20 +30,18 @@ public class JwtController {
 	private TokenManager tokenManager;
 
 	
-	@GetMapping("/login")
-	   public ResponseEntity<?> createToken(@RequestHeader("Username") String username,
-											@RequestHeader("Password") String password) throws Exception{
-
+	@PostMapping("/login")
+	   public ResponseEntity<?> createToken(@RequestBody JwtRequestModel jwtRequestModel ) throws Exception{
 		try {
 			authenticationManager.authenticate(new
-		            UsernamePasswordAuthenticationToken(username, password));
+		            UsernamePasswordAuthenticationToken(jwtRequestModel.getUsername(), jwtRequestModel.getPassword()));
 		} catch (DisabledException e) {
 	         throw new Exception("USER_DISABLED", e);
 	    } catch (BadCredentialsException e) {
 	         throw new Exception("INVALID_CREDENTIALS", e);
 	    }
 		try {
-			UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+			UserDetails userDetails = userDetailsService.loadUserByUsername(jwtRequestModel.getUsername());
 			String jwtToken = tokenManager.generateJWTToken(userDetails);
 			return ResponseEntity.ok(new JwtResponseModel(jwtToken));
 		} catch (Exception e) {
