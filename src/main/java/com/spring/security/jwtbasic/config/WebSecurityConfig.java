@@ -50,6 +50,9 @@ public class WebSecurityConfig {
 	@Bean
 	protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
+		//allow https request only and block http
+		http.authorizeHttpRequests(auth->auth
+				.requestMatchers(request->!request.isSecure()).denyAll());
 		// this object will validate the received csrf token is same as the generated token.
 		CsrfTokenRequestAttributeHandler csrfTokenRequestAttributeHandler = new CsrfTokenRequestAttributeHandler();
 		//the below line will not require to save user details/jsessionid explicitly in SecConHol, spring security will
@@ -77,8 +80,8 @@ public class WebSecurityConfig {
 				.authorizeHttpRequests(request -> request.requestMatchers("/login").permitAll()
 						.anyRequest().authenticated())
 				// Send a 401 error response if user is not authentic.
-				.exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
-				// no session management
+				//.exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
+				// session management always true
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
 				// filter the request and add authentication token
 				.addFilterBefore(filter,  UsernamePasswordAuthenticationFilter.class)
