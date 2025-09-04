@@ -31,7 +31,7 @@ public class JwtController {
 
 	
 	@PostMapping("/login")
-	   public ResponseEntity<?> createToken(@RequestBody JwtRequestModel jwtRequestModel ) throws Exception{
+	   public ResponseEntity<String> createToken(@RequestBody JwtRequestModel jwtRequestModel ) throws Exception{
 		try {
 			authenticationManager.authenticate(new
 		            UsernamePasswordAuthenticationToken(jwtRequestModel.getUsername(), jwtRequestModel.getPassword()));
@@ -43,7 +43,7 @@ public class JwtController {
 		try {
 			UserDetails userDetails = userDetailsService.loadUserByUsername(jwtRequestModel.getUsername());
 			String jwtToken = tokenManager.generateJWTToken(userDetails);
-			return ResponseEntity.ok(new JwtResponseModel(jwtToken));
+			return ResponseEntity.ok(jwtToken);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}

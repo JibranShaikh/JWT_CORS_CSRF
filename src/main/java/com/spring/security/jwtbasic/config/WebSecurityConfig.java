@@ -9,26 +9,23 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.Customizer;
+
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Collections;
-
-//import com.tutorialspoint.security.formlogin.jwtutils.JwtAuthenticationEntryPoint;
-//import com.tutorialspoint.security.formlogin.jwtutils.JwtFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -62,7 +59,7 @@ public class WebSecurityConfig {
 					@Override
 					public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
 						CorsConfiguration cors = new CorsConfiguration();
-						cors.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+						cors.setAllowedOrigins(Collections.singletonList("https://localhost:4200"));
 						cors.setAllowedMethods(Collections.singletonList("*"));
 						cors.setAllowedHeaders(Collections.singletonList("*"));
 						cors.setMaxAge(3600L);
@@ -71,16 +68,20 @@ public class WebSecurityConfig {
 					}
 				}))
 				//.csrf(AbstractHttpConfigurer::disable)
+				//csrf will noe be applicable to login endpoint
 				.csrf(csrfConfig-> csrfConfig
 						.csrfTokenRequestHandler(csrfTokenRequestAttributeHandler)
 						.ignoringRequestMatchers("/login")
 				//this will generate and store the csrf token as a cookie. withHttpOnlyFalse will allow your UI app to read the cookie or else by default only the browser
 				//can read the cookie.
 						.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
-				.authorizeHttpRequests(request -> request.requestMatchers("/login").permitAll()
-						.anyRequest().authenticated())
+				.authorizeHttpRequests(request -> request
+						.requestMatchers("/login").permitAll()
+						.requestMatchers("/hello").hasAnyAuthority("HELLO")
+						.requestMatchers("/posthello").hasAnyAuthority("HELLO"))
+						//.anyRequest().authenticated())
 				// Send a 401 error response if user is not authentic.
-				//.exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
+				.exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
 				// session management always true
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
 				// filter the request and add authentication token
